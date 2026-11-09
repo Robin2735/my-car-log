@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>스마트 차계부 - CarCare</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Hide scrollbar for tabs */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen pb-28 antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- Main Container -->
+  <div class="max-w-md mx-auto min-h-screen bg-slate-50 shadow-xl border-x border-slate-200/70 flex flex-col relative">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-5 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-500/30">
+          <i data-lucide="car-front" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-slate-900 leading-tight">My CarCare</h1>
+          <p class="text-[11px] font-medium text-slate-500" id="car-nickname-display">내 자동차 기록장</p>
+        </div>
+      </div>
+      <button onclick="openCarSettingModal()" class="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+      </button>
+    </header>
+
+    <!-- Top Dashboard -->
+    <section class="p-5 space-y-4">
+      <!-- Primary Card: This Month Expense & Total Odo -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white rounded-3xl p-5 shadow-lg shadow-slate-900/10 relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/20">
+              <span id="current-month-label">이번 달 지출</span>
+            </span>
+            <div class="text-3xl font-extrabold tracking-tight mt-1.5" id="this-month-total">0원</div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 font-medium">최근 누적주행</span>
+            <div class="text-lg font-bold text-slate-100 flex items-center justify-end gap-1">
+              <span id="latest-odometer">0</span><span class="text-xs text-slate-400 font-normal">km</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3.5 border-t border-slate-700/60 grid grid-cols-2 gap-3">
+          <div class="bg-white/5 rounded-2xl p-2.5 px-3">
+            <span class="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+              <i data-lucide="fuel" class="w-3.5 h-3.5 text-amber-400"></i> 평균 연비
+            </span>
+            <div class="text-base font-bold text-white mt-0.5">
+              <span id="avg-fuel-efficiency">-</span> <span class="text-xs text-slate-400 font-normal">km/L</span>
+            </div>
+          </div>
+          <div class="bg-white/5 rounded-2xl p-2.5 px-3">
+            <span class="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+              <i data-lucide="coins" class="w-3.5 h-3.5 text-emerald-400"></i> 누적 총 지출
+            </span>
+            <div class="text-base font-bold text-white mt-0.5" id="grand-total-expense">0원</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Segment Tabs -->
+      <div class="flex bg-slate-200/70 p-1 rounded-2xl text-xs font-semibold text-slate-600">
+        <button onclick="switchTab('records')" id="tab-records-btn" class="flex-1 py-2 text-center rounded-xl bg-white text-slate-900 shadow-sm transition-all duration-200 flex items-center justify-center gap-1.5">
+          <i data-lucide="list-checks" class="w-3.5 h-3.5"></i> 내역 목록
+        </button>
+        <button onclick="switchTab('maintenance')" id="tab-maintenance-btn" class="flex-1 py-2 text-center rounded-xl hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-1.5">
+          <i data-lucide="wrench" class="w-3.5 h-3.5"></i> 소모품 주기
+        </button>
+        <button onclick="switchTab('stats')" id="tab-stats-btn" class="flex-1 py-2 text-center rounded-xl hover:text-slate-900 transition-all duration-200 flex items-center justify-center gap-1.5">
+          <i data-lucide="pie-chart" class="w-3.5 h-3.5"></i> 지출 통계
+        </button>
+      </div>
+    </section>
+
+    <!-- TAB 1: Records View -->
+    <div id="view-records" class="px-5 space-y-3 flex-1">
+      <!-- Filter Chips -->
+      <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
+        <button onclick="filterRecords('ALL')" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-slate-900 text-white" data-category="ALL">전체</button>
+        <button onclick="filterRecords('주유')" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white text-slate-600 border border-slate-200" data-category="주유">⛽ 주유</button>
+        <button onclick="filterRecords('정비/부품')" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white text-slate-600 border border-slate-200" data-category="정비/부품">🔧 정비</button>
+        <button onclick="filterRecords('세차')" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white text-slate-600 border border-slate-200" data-category="세차">🧼 세차</button>
+        <button onclick="filterRecords('통행/주차')" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white text-slate-600 border border-slate-200" data-category="통행/주차">🅿️ 통행/주차</button>
+        <button onclick="filterRecords('보험/세금')" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white text-slate-600 border border-slate-200" data-category="보험/세금">📄 보험/세금</button>
+        <button onclick="filterRecords('기타')" class="category-filter-btn px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white text-slate-600 border border-slate-200" data-category="기타">✨ 기타</button>
+      </div>
+
+      <!-- Record List Container -->
+      <div id="records-list" class="space-y-2.5 pb-6">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- TAB 2: Maintenance Tracker View -->
+    <div id="view-maintenance" class="px-5 space-y-4 flex-1 hidden">
+      <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-900 leading-relaxed flex items-start gap-3">
+        <i data-lucide="info" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5"></i>
+        <span>정비 내역에 등록된 누적 주행거리를 바탕으로 권장 소모품 교체 및 점검 주기를 자동으로 계산합니다.</span>
+      </div>
+
+      <div id="maintenance-items-container" class="space-y-3 pb-6">
+        <!-- Maintenance items rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- TAB 3: Expense Statistics View -->
+    <div id="view-stats" class="px-5 space-y-4 flex-1 hidden">
+      <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex justify-between items-center">
+          <h3 class="text-sm font-bold text-slate-800">이번 달 카테고리별 지출 비율</h3>
+          <span class="text-xs text-slate-500" id="stats-month-label">2026.11</span>
+        </div>
+        <div id="category-bars" class="space-y-3 pt-1">
+          <!-- Dynamic category breakdown bars -->
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-slate-800">지출 가이드 팁</h3>
+        <p class="text-xs text-slate-600 leading-relaxed" id="expense-summary-tip">
+          지출 내역을 기록하면 월별 유지비 패턴과 최적의 절약 포인트를 쉽게 확인할 수 있습니다.
+        </p>
+      </div>
+    </div>
+
+    <!-- Floating Action Button (Add Entry) -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-20 w-full max-w-md px-5 flex justify-end pointer-events-none">
+      <button onclick="openRecordModal()" class="pointer-events-auto h-14 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold flex items-center gap-2.5 shadow-lg shadow-blue-600/30 transition-all duration-150">
+        <i data-lucide="plus" class="w-5 h-5"></i>
+        <span class="text-sm">내역 기록</span>
+      </button>
+    </div>
+
+    <!-- Modals -->
+    <!-- 1. Add / Edit Record Modal -->
+    <div id="record-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+      <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-in slide-in-from-bottom-6 duration-200">
+        <!-- Modal Header -->
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+          <h2 class="text-base font-bold text-slate-900" id="modal-title">차량 내역 기록하기</h2>
+          <button onclick="closeRecordModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body (Form) -->
+        <form id="record-form" onsubmit="handleRecordSubmit(event)" class="p-5 overflow-y-auto space-y-4">
+          <input type="hidden" id="entry-id">
+
+          <!-- Category Selector -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">카테고리 *</label>
+            <div class="grid grid-cols-3 gap-2" id="category-picker">
+              <button type="button" onclick="selectFormCategory('주유')" class="cat-choice-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-blue-500 bg-blue-50 text-blue-600 text-center" data-val="주유">⛽ 주유</button>
+              <button type="button" onclick="selectFormCategory('정비/부품')" class="cat-choice-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-700 text-center" data-val="정비/부품">🔧 정비/부품</button>
+              <button type="button" onclick="selectFormCategory('세차')" class="cat-choice-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-700 text-center" data-val="세차">🧼 세차</button>
+              <button type="button" onclick="selectFormCategory('통행/주차')" class="cat-choice-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-700 text-center" data-val="통행/주차">🅿️ 통행/주차</button>
+              <button type="button" onclick="selectFormCategory('보험/세금')" class="cat-choice-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-700 text-center" data-val="보험/세금">📄 보험/세금</button>
+              <button type="button" onclick="selectFormCategory('기타')" class="cat-choice-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-700 text-center" data-val="기타">✨ 기타</button>
+            </div>
+            <input type="hidden" id="form-category" value="주유" required>
+          </div>
+
+          <!-- Date & Odometer -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">날짜 *</label>
+              <input type="date" id="form-date" required class="w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1.5">누적 주행거리 (km) *</label>
+              <input type="number" id="form-odometer" placeholder="예: 45200" required min="0" step="1" class="w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+          </div>
+
+          <!-- Total Cost (KRW) -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">결제 금액 (원) *</label>
+            <div class="relative">
+              <input type="number" id="form-cost" placeholder="0" required min="0" step="1" oninput="calculateFuelMetrics()" class="w-full text-sm font-bold bg-slate-50 border border-slate-200 rounded-xl pl-3 pr-8 py-2.5 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
+              <span class="absolute right-3 top-2.5 text-xs font-medium text-slate-400">원</span>
+            </div>
+          </div>
+
+          <!-- Extra Fields: For Fueling (주유) -->
+          <div id="fuel-fields" class="bg-blue-50/70 border border-blue-100 rounded-2xl p-3.5 space-y-3">
+            <div class="text-[11px] font-bold text-blue-900 flex items-center justify-between">
+              <span>⛽ 주유 상세 (연비 계산용)</span>
+              <span id="fuel-calc-result" class="text-blue-600 font-semibold">단가: - 원/L</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-semibold text-blue-800 mb-1">주유량 (L)</label>
+                <input type="number" id="form-fuel-amount" placeholder="예: 42.5" step="0.01" min="0" oninput="calculateFuelMetrics()" class="w-full text-xs font-medium bg-white border border-blue-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-blue-800 mb-1">리터당 단가 (원)</label>
+                <input type="number" id="form-fuel-price" placeholder="자동계산" step="1" min="0" oninput="calculateFuelByPrice()" class="w-full text-xs font-medium bg-white border border-blue-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300">
+              </div>
+            </div>
+          </div>
+
+          <!-- Extra Fields: For Maintenance (정비 태그 빠른 선택) -->
+          <div id="maintenance-fields" class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2 hidden">
+            <label class="block text-[11px] font-bold text-slate-700">🔧 정비 항목 빠른 태그</label>
+            <div class="flex flex-wrap gap-1.5" id="maintenance-tags">
+              <button type="button" onclick="appendTag('엔진오일')" class="text-[11px] px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors">+ 엔진오일</button>
+              <button type="button" onclick="appendTag('에어컨필터')" class="text-[11px] px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors">+ 에어컨필터</button>
+              <button type="button" onclick="appendTag('타이어 위치교환')" class="text-[11px] px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors">+ 타이어 위치교환</button>
+              <button type="button" onclick="appendTag('와이퍼')" class="text-[11px] px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors">+ 와이퍼</button>
+              <button type="button" onclick="appendTag('브레이크오일')" class="text-[11px] px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors">+ 브레이크오일</button>
+              <button type="button" onclick="appendTag('배터리')" class="text-[11px] px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors">+ 배터리</button>
+            </div>
+          </div>
+
+          <!-- Memo / Details -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">메모 및 세부내역</label>
+            <input type="text" id="form-memo" placeholder="예: GS칼텍스 직영점 / 모빌원 5W-30 교체" class="w-full text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all">
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="closeRecordModal()" class="w-1/3 py-3 rounded-xl border border-slate-200 font-semibold text-xs text-slate-600 hover:bg-slate-100 transition-all">취소</button>
+            <button type="submit" class="w-2/3 py-3 rounded-xl bg-blue-600 font-semibold text-xs text-white hover:bg-blue-700 shadow-md shadow-blue-500/20 transition-all">저장 완료</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. Settings Modal (Car Info & Reset) -->
+    <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+          <h3 class="text-sm font-bold text-slate-900">차량 정보 설정</h3>
+          <button onclick="closeCarSettingModal()" class="text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">차량 닉네임 / 모델명</label>
+            <input type="text" id="settings-car-name" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">유종</label>
+            <select id="settings-car-fuel" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+              <option value="휘발유">휘발유 (가솔린)</option>
+              <option value="경유">경유 (디젤)</option>
+              <option value="LPG">LPG</option>
+              <option value="하이브리드">하이브리드</option>
+              <option value="전기">전기차 (EV)</option>
+            </select>
+          </div>
+        </div>
+        <div class="pt-2 flex flex-col gap-2">
+          <button onclick="saveCarSettings()" class="w-full py-2.5 bg-blue-600 text-white rounded-xl text-xs font-semibold">설정 저장</button>
+          <button onclick="resetToSampleData()" class="w-full py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-medium hover:bg-slate-200">샘플 데이터 다시 불러오기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-full shadow-lg opacity-0 transition-opacity pointer-events-none duration-300">
+      알림 메시지
+    </div>
+
+  </div>
+
+  <script>
+    // Initial sample dataset
+    const DEFAULT_RECORDS = [
+      {
+        id: "rec_1",
+        date: "2026-11-02",
+        category: "주유",
+        odometer: 45800,
+        cost: 65000,
+        fuelAmount: 39.5,
+        fuelPrice: 1645,
+        memo: "GS칼텍스 신도시점"
+      },
+      {
+        id: "rec_2",
+        date: "2026-10-25",
+        category: "정비/부품",
+        odometer: 45450,
+        cost: 95000,
+        memo: "엔진오일 세트 및 에어필터 교환 (공임나라)"
+      },
+      {
+        id: "rec_3",
+        date: "2026-10-18",
+        category: "주유",
+        odometer: 45100,
+        cost: 70000,
+        fuelAmount: 42.4,
+        fuelPrice: 1650,
+        memo: "SK에너지 만유주유소"
+      },
+      {
+        id: "rec_4",
+        date: "2026-10-10",
+        category: "세차",
+        odometer: 44920,
+        cost: 15000,
+        memo: "노터치 자동세차 및 내부청소"
+      },
+      {
+        id: "rec_5",
+        date: "2026-10-02",
+        category: "통행/주차",
+        odometer: 44700,
+        cost: 8500,
+        memo: "고속도로 통행료 충전"
+      },
+      {
+        id: "rec_6",
+        date: "2026-06-15",
+        category: "정비/부품",
+        odometer: 40000,
+        cost: 20000,
+        memo: "타이어 위치교환 완료"
+      }
+    ];
+
+    // Maintenance intervals standards (in km)
+    const MAINTENANCE_STANDARDS = [
+      { key: "엔진오일", name: "엔진오일 & 필터", intervalKm: 8000, icon: "droplet", desc: "주기적인 교환으로 엔진 마모 방지" },
+      { key: "에어컨필터", name: "에어컨 / 히터 필터", intervalKm: 10000, icon: "wind", desc: "실내 공기질 및 냄새 개선 (6개월~1년)" },
+      { key: "타이어 위치교환", name: "타이어 위치교환", intervalKm: 10000, icon: "disc", desc: "전후륜 마모 균형 유지 (1만km 권장)" },
+      { key: "와이퍼", name: "와이퍼 블레이드", intervalKm: 12000, icon: "shield", desc: "시야 확보 및 유리기스 예방" },
+      { key: "브레이크오일", name: "브레이크 오일", intervalKm: 40000, icon: "alert-triangle", desc: "제동력 저하 및 베이퍼 록 방지" },
+      { key: "배터리", name: "시동 배터리", intervalKm: 50000, icon: "zap", desc: "3~4년 또는 50,000km 도달 시 점검" }
+    ];
+
+    // State Variables
+    let records = [];
+    let activeFilter = 'ALL';
+    let carSettings = {
+      name: "아반떼 CN7",
+      fuelType: "휘발유"
+    };
+
+    // Initialize Application
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStorage();
+      updateDashboard();
+      renderRecords();
+      renderMaintenance();
+      renderStats();
+      lucide.createIcons();
+
+      // Set today's date in form default
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('form-date').value = today;
+    });
+
+    // Local Storage Loading & Saving
+    function loadStorage() {
+      const storedRecords = localStorage.getItem('carcare_records');
+      if (storedRecords) {
+        try {
+          records = JSON.parse(storedRecords);
+        } catch (e) {
+          records = [...DEFAULT_RECORDS];
+        }
+      } else {
+        records = [...DEFAULT_RECORDS];
+        saveStorage();
+      }
+
+      const storedCar = localStorage.getItem('carcare_settings');
+      if (storedCar) {
+        try {
+          carSettings = JSON.parse(storedCar);
+        } catch (e) {}
+      }
+      applyCarSettingsDisplay();
+    }
+
+    function saveStorage() {
+      localStorage.setItem('carcare_records', JSON.stringify(records));
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2000);
+    }
+
+    // Tab Navigation
+    function switchTab(tabId) {
+      const views = ['records', 'maintenance', 'stats'];
+      views.forEach(v => {
+        const viewEl = document.getElementById(`view-${v}`);
+        const btnEl = document.getElementById(`tab-${v}-btn`);
+        if (v === tabId) {
+          viewEl.classList.remove('hidden');
+          btnEl.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+          btnEl.classList.remove('text-slate-600');
+        } else {
+          viewEl.classList.add('hidden');
+          btnEl.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+          btnEl.classList.add('text-slate-600');
+        }
+      });
+
+      if (tabId === 'maintenance') {
+        renderMaintenance();
+      } else if (tabId === 'stats') {
+        renderStats();
+      }
+      lucide.createIcons();
+    }
+
+    // Dashboard Calculations
+    function updateDashboard() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      const monthPrefix = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+      let thisMonthSum = 0;
+      let grandTotalSum = 0;
+      let maxOdometer = 0;
+
+      records.forEach(r => {
+        const cost = Number(r.cost) || 0;
+        grandTotalSum += cost;
+        if (r.date && r.date.startsWith(monthPrefix)) {
+          thisMonthSum += cost;
+        }
+        if (Number(r.odometer) > maxOdometer) {
+          maxOdometer = Number(r.odometer);
+        }
+      });
+
+      // Calculate Fuel Efficiency based on consecutive fuel records
+      // Filter & sort fuel records by odometer ascending
+      const fuelRecords = records
+        .filter(r => r.category === '주유' && r.fuelAmount && Number(r.fuelAmount) > 0)
+        .sort((a, b) => Number(a.odometer) - Number(b.odometer));
+
+      let totalDist = 0;
+      let totalLiters = 0;
+      for (let i = 1; i < fuelRecords.length; i++) {
+        const dist = Number(fuelRecords[i].odometer) - Number(fuelRecords[i - 1].odometer);
+        const liters = Number(fuelRecords[i].fuelAmount);
+        if (dist > 0 && liters > 0) {
+          totalDist += dist;
+          totalLiters += liters;
+        }
+      }
+
+      const avgEff = totalLiters > 0 ? (totalDist / totalLiters).toFixed(2) : '-';
+
+      // Update UI elements
+      document.getElementById('current-month-label').textContent = `${currentMonth}월 지출`;
+      document.getElementById('this-month-total').textContent = `${thisMonthSum.toLocaleString()}원`;
+      document.getElementById('grand-total-expense').textContent = `${grandTotalSum.toLocaleString()}원`;
+      document.getElementById('latest-odometer').textContent = maxOdometer > 0 ? maxOdometer.toLocaleString() : '-';
+      document.getElementById('avg-fuel-efficiency').textContent = avgEff;
+    }
+
+    // Filter Logic
+    function filterRecords(cat) {
+      activeFilter = cat;
+      document.querySelectorAll('.category-filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-category') === cat) {
+          btn.classList.add('bg-slate-900', 'text-white');
+          btn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+        } else {
+          btn.classList.remove('bg-slate-900', 'text-white');
+          btn.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+        }
+      });
+      renderRecords();
+    }
+
+    // Render Records List
+    function renderRecords() {
+      const container = document.getElementById('records-list');
+      container.innerHTML = '';
+
+      // Sort newest first
+      const filtered = records
+        .filter(r => activeFilter === 'ALL' || r.category === activeFilter)
+        .sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.odometer) - Number(a.odometer));
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="py-16 text-center text-slate-400">
+            <i data-lucide="clipboard-x" class="w-10 h-10 mx-auto mb-2 stroke-[1.5] text-slate-300"></i>
+            <p class="text-xs">등록된 내역이 없습니다.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(rec => {
+        const item = document.createElement('div');
+        item.className = "bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between hover:border-slate-300 transition-colors";
+
+        const iconMap = {
+          '주유': { icon: 'fuel', bg: 'bg-amber-100 text-amber-600' },
+          '정비/부품': { icon: 'wrench', bg: 'bg-blue-100 text-blue-600' },
+          '세차': { icon: 'sparkles', bg: 'bg-cyan-100 text-cyan-600' },
+          '통행/주차': { icon: 'map-pin', bg: 'bg-indigo-100 text-indigo-600' },
+          '보험/세금': { icon: 'file-text', bg: 'bg-emerald-100 text-emerald-600' },
+          '기타': { icon: 'tag', bg: 'bg-purple-100 text-purple-600' }
+        };
+
+        const config = iconMap[rec.category] || iconMap['기타'];
+
+        item.innerHTML = `
+          <div class="flex items-center space-x-3 min-w-0">
+            <div class="w-10 h-10 rounded-2xl ${config.bg} flex items-center justify-center flex-shrink-0">
+              <i data-lucide="${config.icon}" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-xs font-bold text-slate-900">${rec.category}</span>
+                <span class="text-[11px] text-slate-400">${rec.date}</span>
+              </div>
+              <p class="text-xs text-slate-600 truncate mt-0.5">${rec.memo || '메모 없음'}</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">${Number(rec.odometer).toLocaleString()} km ${rec.fuelAmount ? `· ${rec.fuelAmount}L` : ''}</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 flex-shrink-0 ml-3">
+            <div class="text-right">
+              <span class="text-sm font-bold text-slate-900">${Number(rec.cost).toLocaleString()}원</span>
+              ${rec.fuelPrice ? `<p class="text-[10px] text-slate-400">@${rec.fuelPrice.toLocaleString()}원</p>` : ''}
+            </div>
+            <div class="flex flex-col gap-1">
+              <button onclick="editRecord('${rec.id}')" class="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-50 transition-colors" title="수정">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteRecord('${rec.id}')" class="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-slate-50 transition-colors" title="삭제">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Render Maintenance Progress
+    function renderMaintenance() {
+      const container = document.getElementById('maintenance-items-container');
+      container.innerHTML = '';
+
+      // Get latest total odometer
+      const maxOdo = records.reduce((max, r) => Math.max(max, Number(r.odometer) || 0), 0);
+
+      MAINTENANCE_STANDARDS.forEach(std => {
+        // Find most recent replacement for this item
+        const related = records
+          .filter(r => r.category === '정비/부품' && r.memo && r.memo.includes(std.key))
+          .sort((a, b) => Number(b.odometer) - Number(a.odometer));
+
+        const lastOdo = related.length > 0 ? Number(related[0].odometer) : 0;
+        const lastDate = related.length > 0 ? related[0].date : '교체 기록 없음';
+
+        const drivenSince = maxOdo > 0 && lastOdo > 0 ? (maxOdo - lastOdo) : 0;
+        const targetOdo = lastOdo > 0 ? lastOdo + std.intervalKm : maxOdo + std.intervalKm;
+        const progressPercent = Math.min(100, Math.round((drivenSince / std.intervalKm) * 100));
+
+        let statusBadge = '';
+        let barColor = 'bg-blue-500';
+
+        if (lastOdo === 0) {
+          statusBadge = '<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">기록 없음</span>';
+          barColor = 'bg-slate-300';
+        } else if (progressPercent >= 100) {
+          statusBadge = '<span class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold animate-pulse">교체 필요</span>';
+          barColor = 'bg-red-500';
+        } else if (progressPercent >= 80) {
+          statusBadge = '<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">교체 임박</span>';
+          barColor = 'bg-amber-500';
+        } else {
+          statusBadge = '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">양호</span>';
+          barColor = 'bg-blue-600';
+        }
+
+        const card = document.createElement('div');
+        card.className = "bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-2.5";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+                <i data-lucide="${std.icon}" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <h4 class="text-xs font-bold text-slate-900">${std.name}</h4>
+                <p class="text-[10px] text-slate-400">교체 주기: ${std.intervalKm.toLocaleString()} km</p>
+              </div>
+            </div>
+            ${statusBadge}
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="space-y-1">
+            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div class="${barColor} h-2 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 pt-0.5">
+              <span>최근: ${lastOdo > 0 ? `${lastOdo.toLocaleString()} km (${lastDate})` : '없음'}</span>
+              <span>권장: ${targetOdo.toLocaleString()} km</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Render Statistics
+    function renderStats() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      const monthPrefix = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+      document.getElementById('stats-month-label').textContent = `${currentYear}년 ${currentMonth}월`;
+
+      const monthRecords = records.filter(r => r.date && r.date.startsWith(monthPrefix));
+      const categoryTotals = {};
+      let totalCost = 0;
+
+      monthRecords.forEach(r => {
+        const cost = Number(r.cost) || 0;
+        categoryTotals[r.category] = (categoryTotals[r.category] || 0) + cost;
+        totalCost += cost;
+      });
+
+      const container = document.getElementById('category-bars');
+      container.innerHTML = '';
+
+      if (totalCost === 0) {
+        container.innerHTML = `
+          <p class="text-xs text-slate-400 py-6 text-center">이번 달 지출 내역이 없습니다.</p>
+        `;
+        document.getElementById('expense-summary-tip').textContent = "새 지출을 기록하면 이번 달 항목별 지출 비율 통계가 생성됩니다.";
+        return;
+      }
+
+      const categories = Object.keys(categoryTotals).sort((a, b) => categoryTotals[b] - categoryTotals[a]);
+
+      categories.forEach(cat => {
+        const amount = categoryTotals[cat];
+        const ratio = Math.round((amount / totalCost) * 100);
+
+        const row = document.createElement('div');
+        row.className = "space-y-1";
+        row.innerHTML = `
+          <div class="flex justify-between text-xs font-medium">
+            <span class="text-slate-700">${cat}</span>
+            <span class="text-slate-900 font-bold">${amount.toLocaleString()}원 <span class="text-slate-400 font-normal">(${ratio}%)</span></span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div class="bg-blue-600 h-2 rounded-full" style="width: ${ratio}%"></div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      // Insight tip
+      const topCat = categories[0];
+      document.getElementById('expense-summary-tip').textContent = 
+        `이번 달은 '${topCat}' 항목 지출이 전체의 ${Math.round((categoryTotals[topCat]/totalCost)*100)}%로 가장 높은 비중을 차지하고 있습니다.`;
+    }
+
+    // Modal Control
+    function openRecordModal(editData = null) {
+      const modal = document.getElementById('record-modal');
+      const form = document.getElementById('record-form');
+      form.reset();
+
+      if (editData) {
+        document.getElementById('modal-title').textContent = "차량 내역 수정";
+        document.getElementById('entry-id').value = editData.id;
+        document.getElementById('form-date').value = editData.date;
+        document.getElementById('form-odometer').value = editData.odometer;
+        document.getElementById('form-cost').value = editData.cost;
+        document.getElementById('form-memo').value = editData.memo || '';
+        document.getElementById('form-fuel-amount').value = editData.fuelAmount || '';
+        document.getElementById('form-fuel-price').value = editData.fuelPrice || '';
+        selectFormCategory(editData.category);
+      } else {
+        document.getElementById('modal-title').textContent = "차량 내역 기록하기";
+        document.getElementById('entry-id').value = '';
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('form-date').value = today;
+
+        // Auto-fill latest odometer as placeholder hint or default value
+        const maxOdo = records.reduce((max, r) => Math.max(max, Number(r.odometer) || 0), 0);
+        if (maxOdo > 0) {
+          document.getElementById('form-odometer').placeholder = `최근: ${maxOdo}`;
+        }
+        selectFormCategory('주유');
+      }
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeRecordModal() {
+      document.getElementById('record-modal').classList.add('hidden');
+    }
+
+    // Category Selector in Modal
+    function selectFormCategory(cat) {
+      document.getElementById('form-category').value = cat;
+      document.querySelectorAll('.cat-choice-btn').forEach(b => {
+        if (b.getAttribute('data-val') === cat) {
+          b.className = "cat-choice-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-blue-500 bg-blue-50 text-blue-600 text-center";
+        } else {
+          b.className = "cat-choice-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-700 text-center";
+        }
+      });
+
+      // Show/hide sub-sections
+      const fuelSec = document.getElementById('fuel-fields');
+      const maintSec = document.getElementById('maintenance-fields');
+
+      if (cat === '주유') {
+        fuelSec.classList.remove('hidden');
+        maintSec.classList.add('hidden');
+      } else if (cat === '정비/부품') {
+        fuelSec.classList.add('hidden');
+        maintSec.classList.remove('hidden');
+      } else {
+        fuelSec.classList.add('hidden');
+        maintSec.classList.add('hidden');
+      }
+    }
+
+    function appendTag(tagText) {
+      const memoInput = document.getElementById('form-memo');
+      if (memoInput.value.includes(tagText)) return;
+      memoInput.value = memoInput.value ? `${memoInput.value}, ${tagText}` : tagText;
+    }
+
+    // Dynamic fuel calculation
+    function calculateFuelMetrics() {
+      const cost = parseFloat(document.getElementById('form-cost').value);
+      const liters = parseFloat(document.getElementById('form-fuel-amount').value);
+      const resSpan = document.getElementById('fuel-calc-result');
+
+      if (cost > 0 && liters > 0) {
+        const unitPrice = Math.round(cost / liters);
+        document.getElementById('form-fuel-price').value = unitPrice;
+        resSpan.textContent = `단가: ${unitPrice.toLocaleString()} 원/L`;
+      } else {
+        resSpan.textContent = "단가: - 원/L";
+      }
+    }
+
+    function calculateFuelByPrice() {
+      const cost = parseFloat(document.getElementById('form-cost').value);
+      const price = parseFloat(document.getElementById('form-fuel-price').value);
+      if (cost > 0 && price > 0) {
+        const liters = (cost / price).toFixed(2);
+        document.getElementById('form-fuel-amount').value = liters;
+        document.getElementById('fuel-calc-result').textContent = `단가: ${Math.round(price).toLocaleString()} 원/L`;
+      }
+    }
+
+    // Submit handler
+    function handleRecordSubmit(e) {
+      e.preventDefault();
+
+      const id = document.getElementById('entry-id').value;
+      const date = document.getElementById('form-date').value;
+      const category = document.getElementById('form-category').value;
+      const odometer = parseInt(document.getElementById('form-odometer').value, 10);
+      const cost = parseInt(document.getElementById('form-cost').value, 10);
+      const memo = document.getElementById('form-memo').value.trim();
+
+      const fuelAmount = parseFloat(document.getElementById('form-fuel-amount').value) || null;
+      const fuelPrice = parseInt(document.getElementById('form-fuel-price').value, 10) || null;
+
+      if (!date || isNaN(odometer) || isNaN(cost)) {
+        showToast("필수 항목을 모두 정확히 입력해주세요.");
+        return;
+      }
+
+      if (id) {
+        // Edit Existing
+        const idx = records.findIndex(r => r.id === id);
+        if (idx !== -1) {
+          records[idx] = {
+            ...records[idx],
+            date,
+            category,
+            odometer,
+            cost,
+            memo,
+            fuelAmount,
+            fuelPrice
+          };
+          showToast("기록이 수정되었습니다.");
+        }
+      } else {
+        // Create New
+        const newRecord = {
+          id: 'rec_' + Date.now(),
+          date,
+          category,
+          odometer,
+          cost,
+          memo,
+          fuelAmount,
+          fuelPrice
+        };
+        records.unshift(newRecord);
+        showToast("새 내역이 등록되었습니다.");
+      }
+
+      saveStorage();
+      updateDashboard();
+      renderRecords();
+      renderMaintenance();
+      renderStats();
+      closeRecordModal();
+    }
+
+    function editRecord(id) {
+      const rec = records.find(r => r.id === id);
+      if (rec) {
+        openRecordModal(rec);
+      }
+    }
+
+    function deleteRecord(id) {
+      if (!confirm("정말 이 내역을 삭제하시겠습니까?")) return;
+      records = records.filter(r => r.id !== id);
+      saveStorage();
+      updateDashboard();
+      renderRecords();
+      renderMaintenance();
+      renderStats();
+      showToast("내역이 삭제되었습니다.");
+    }
+
+    // Settings Modal
+    function openCarSettingModal() {
+      document.getElementById('settings-car-name').value = carSettings.name || '';
+      document.getElementById('settings-car-fuel').value = carSettings.fuelType || '휘발유';
+      document.getElementById('settings-modal').classList.remove('hidden');
+    }
+
+    function closeCarSettingModal() {
+      document.getElementById('settings-modal').classList.add('hidden');
+    }
+
+    function saveCarSettings() {
+      carSettings.name = document.getElementById('settings-car-name').value.trim() || '내 차';
+      carSettings.fuelType = document.getElementById('settings-car-fuel').value;
+      localStorage.setItem('carcare_settings', JSON.stringify(carSettings));
+      applyCarSettingsDisplay();
+      closeCarSettingModal();
+      showToast("차량 설정이 저장되었습니다.");
+    }
+
+    function applyCarSettingsDisplay() {
+      document.getElementById('car-nickname-display').textContent = `${carSettings.name} · ${carSettings.fuelType}`;
+    }
+
+    function resetToSampleData() {
+      if (!confirm("기존 기록이 초기화되고 샘플 데이터로 복원됩니다. 계속하시겠습니까?")) return;
+      records = [...DEFAULT_RECORDS];
+      carSettings = { name: "아반떼 CN7", fuelType: "휘발유" };
+      saveStorage();
+      localStorage.setItem('carcare_settings', JSON.stringify(carSettings));
+      applyCarSettingsDisplay();
+      updateDashboard();
+      renderRecords();
+      renderMaintenance();
+      renderStats();
+      closeCarSettingModal();
+      showToast("샘플 데이터로 복원되었습니다.");
+    }
+  </script>
+</body>
+</html>
