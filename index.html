@@ -35,7 +35,7 @@
 
   <main class="max-w-md mx-auto px-4 pt-4 space-y-4">
 
-    <!-- 핵심 대시보드 카드 -->
+    <!-- 대시보드 카드 -->
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
         <div class="text-xs text-slate-400 flex items-center justify-between">
@@ -106,9 +106,7 @@
         <p class="text-xs mt-2">구글 시트에서 데이터를 불러오는 중...</p>
       </div>
 
-      <div id="recordList" class="space-y-2.5 hidden">
-        <!-- 동적 렌더링 영역 -->
-      </div>
+      <div id="recordList" class="space-y-2.5 hidden"></div>
     </div>
   </main>
 
@@ -121,17 +119,17 @@
   </div>
 
   <!-- 입력 모달창 -->
-  <div id="inputModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+  <div id="inputModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 max-h-[92vh] overflow-y-auto no-scrollbar shadow-2xl">
       <div class="flex justify-between items-center pb-3 border-b border-slate-800">
         <h3 class="text-base font-bold text-white">차량 지출 등록</h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1">
+        <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-white p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
       <form id="recordForm" onsubmit="handleSubmit(event)" class="mt-4 space-y-4">
-        <!-- 1. 카테고리 선택 칩 (7종) -->
+        <!-- 1. 카테고리 선택 칩 -->
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-2">구분 선택</label>
           <div class="grid grid-cols-4 gap-2">
@@ -154,7 +152,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">내용 / 장소</label>
-            <input type="text" id="formTitle" placeholder="예: GS칼텍스, 엔진오일 교체" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formTitle" placeholder="예: 알뜰주유소, 주차요금" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
           </div>
         </div>
 
@@ -170,7 +168,7 @@
           </div>
         </div>
 
-        <!-- 4. 주유 전용 영역 (주유 선택 시에만 활성화) -->
+        <!-- 4. 주유 전용 영역 -->
         <div id="fuelSection" class="p-3 bg-slate-800/50 border border-slate-800 rounded-xl space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -178,8 +176,8 @@
               <input type="number" step="0.01" id="formLiters" placeholder="예: 32.5" oninput="calculateUnitPrice()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">리터당 단가 (자동계산)</label>
-              <input type="number" id="formUnitPrice" placeholder="원/L" class="w-full bg-slate-800/60 border border-slate-700/60 rounded-xl px-3 py-2.5 text-xs text-emerald-400 font-semibold placeholder-slate-500 focus:outline-none">
+              <label class="block text-xs font-semibold text-slate-400 mb-1">리터당 단가 (원/L)</label>
+              <input type="number" id="formUnitPrice" placeholder="자동계산" class="w-full bg-slate-800/60 border border-slate-700/60 rounded-xl px-3 py-2.5 text-xs text-emerald-400 font-semibold placeholder-slate-500 focus:outline-none">
             </div>
           </div>
         </div>
@@ -199,7 +197,6 @@
   </div>
 
   <script>
-    // 전달해주신 배포 URL
     const API_URL = "https://script.google.com/macros/s/AKfycbzgYEqusdd1Wan5lDAojR_cF-7Si8QqpkOL--CqfwYfI15Cxwwm0moZx4Gad8G0ZQaBkw/exec";
 
     let records = [];
@@ -210,7 +207,7 @@
       fetchData();
     });
 
-    // 1. 구글 시트 데이터 가져오기 (GET)
+    // 1. 구글 시트 데이터 로드 (GET & 리다이렉트 대응)
     async function fetchData() {
       const refreshIcon = document.getElementById("refreshIcon");
       const loading = document.getElementById("loadingIndicator");
@@ -221,18 +218,22 @@
       list.classList.add("hidden");
 
       try {
-        const res = await fetch(API_URL);
-        records = await res.json();
-        // 최신 날짜순 정렬
+        const res = await fetch(API_URL, {
+          method: "GET",
+          redirect: "follow"
+        });
+        const data = await res.json();
+        records = Array.isArray(data) ? data : [];
         records.sort((a, b) => new Date(b.date) - new Date(a.date));
-        updateDashboard();
-        renderRecords();
       } catch (err) {
-        console.error("데이터 불러오기 실패:", err);
+        console.warn("데이터 로드 주의 (빈 시트이거나 네트워크 대기):", err);
+        records = [];
       } finally {
         refreshIcon.classList.remove("fa-spin");
         loading.classList.add("hidden");
         list.classList.remove("hidden");
+        updateDashboard();
+        renderRecords();
       }
     }
 
@@ -241,40 +242,48 @@
       const now = new Date();
       const currentYear = now.getFullYear();
       const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-      const yearMonthPrefix = `${currentYear}-${currentMonth}`;
+      const yearMonthPrefix = `${currentYear}-${currentMonth}`;  let monthlyTotal = 0; let totalCost = 0; let maxOdo = 0;  records.forEach(r => { const cost = Number(r.cost) \vert{}\vert{} 0; const odo = Number(r.odo) \vert{}\vert{} 0; totalCost += cost;  if (String(r.date).startsWith(yearMonthPrefix)) { monthlyTotal += cost; } if (odo > maxOdo) { maxOdo = odo; } });  document.getElementById("monthlyTotal").innerText = monthlyTotal.toLocaleString(); document.getElementById("totalCost").innerText = totalCost.toLocaleString(); document.getElementById("latestOdo").innerText = maxOdo > 0 ? maxOdo.toLocaleString() : "0";  calculateFuelEfficiency(); }  function calculateFuelEfficiency() { const fuelRecords = records .filter(r => r.type === "주유" && Number(r.odo) > 0 && Number(r.liters) > 0) .sort((a, b) => Number(a.odo) - Number(b.odo));  if (fuelRecords.length >= 2) { const last = fuelRecords[fuelRecords.length - 1]; const prev = fuelRecords[fuelRecords.length - 2]; const distance = last.odo - prev.odo; if (distance > 0 && last.liters > 0) { const eff = (distance / last.liters).toFixed(1); document.getElementById("avgFuelEfficiency").innerText = eff; return; } } document.getElementById("avgFuelEfficiency").innerText = "--"; }  // 3. 내역 렌더링 function renderRecords() { const container = document.getElementById("recordList"); container.innerHTML = "";  const filtered = currentFilter === '전체' ? records : records.filter(r => r.type === currentFilter);  document.getElementById("recordCount").innerText = `${filtered.length}건`;
 
-      let monthlyTotal = 0;
-      let totalCost = 0;
-      let maxOdo = 0;
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 text-slate-500 bg-slate-800/40 rounded-xl border border-slate-800">
+            <i class="fa-regular fa-folder-open text-2xl mb-2 text-slate-600 block"></i>
+            <p class="text-xs">등록된 지출 내역이 없습니다.</p>
+            <p class="text-[11px] text-slate-600 mt-1">하단의 [새로운 기록 추가]를 눌러 첫 기록을 남겨보세요.</p>
+          </div>
+        `;
+        return;
+      }
 
-      records.forEach(r => {
-        const cost = Number(r.cost) || 0;
-        const odo = Number(r.odo) || 0;
-        totalCost += cost;
+      filtered.forEach(r => {
+        const item = document.createElement("div");
+        item.className = "bg-slate-800/80 border border-slate-700/60 rounded-xl p-3 flex justify-between items-center shadow-sm";
 
-        if (String(r.date).startsWith(yearMonthPrefix)) {
-          monthlyTotal += cost;
-        }
-        if (odo > maxOdo) {
-          maxOdo = odo;
-        }
-      });
+        let iconClass = "fa-receipt text-purple-400";
+        if (r.type === "주유") iconClass = "fa-gas-pump text-emerald-400";
+        else if (r.type === "정비") iconClass = "fa-wrench text-blue-400";
+        else if (r.type === "세차") iconClass = "fa-spray-can text-cyan-400";
+        else if (r.type === "주차") iconClass = "fa-square-parking text-amber-400";
+        else if (r.type === "통행료") iconClass = "fa-road text-indigo-400";
+        else if (r.type === "보험/세금") iconClass = "fa-file-invoice-dollar text-red-400";
 
-      document.getElementById("monthlyTotal").innerText = monthlyTotal.toLocaleString();
-      document.getElementById("totalCost").innerText = totalCost.toLocaleString();
-      document.getElementById("latestOdo").innerText = maxOdo > 0 ? maxOdo.toLocaleString() : "--";
+        let subDetails = [];
+        if (r.odo) subDetails.push(`${Number(r.odo).toLocaleString()}km`);
+        if (r.type === "주유" && r.liters) subDetails.push(`${r.liters}L`); if (r.type === "주유" && r.unitPrice) subDetails.push(`@${Number(r.unitPrice).toLocaleString()}원`);
+        if (r.note) subDetails.push(r.note);
 
-      // 주유 연비 계산 (최근 2회 주유 기록 비교)
-      calculateFuelEfficiency();
-    }
-
-    function calculateFuelEfficiency() {
-      const fuelRecords = records
-        .filter(r => r.type === "주유" && Number(r.odo) > 0 && Number(r.liters) > 0)
-        .sort((a, b) => Number(a.odo) - Number(b.odo));
-
-      if (fuelRecords.length >= 2) {
-        const last = fuelRecords[fuelRecords.length - 1];
-        const prev = fuelRecords[fuelRecords.length - 2];
-        const distance = last.odo - prev.odo;
-        if (distance > 0 &&
+        item.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center text-sm border border-slate-700/50">
+              <i class="fa-solid ${iconClass}"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-1.5">
+                <span class="text-xs font-bold text-white">${r.title || r.type}</span>
+                <span class="text-[10px] bg-slate-700/60 text-slate-300 px-1.5 py-0.2 rounded font-medium">${r.type}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">${subDetails.join(" · ") || r.date}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-sm font-bold text-white">${Number(r.cost).toLocaleString()}</span><span class
