@@ -35,15 +35,26 @@
 
   <main class="max-w-md mx-auto px-4 pt-4 space-y-4">
 
-    <!-- 대시보드 요약 카드 -->
+    <!-- 월 선택 셀렉터 바 -->
+    <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl px-4 py-2.5 flex items-center justify-between shadow-sm">
+      <div class="flex items-center space-x-2 text-xs font-semibold text-slate-300">
+        <i class="fa-regular fa-calendar text-emerald-400"></i>
+        <span>조회 기간 선택</span>
+      </div>
+      <select id="monthSelector" onchange="changeSelectedMonth(this.value)" class="bg-slate-900 border border-slate-700 text-xs font-bold text-white rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500">
+        <option value="ALL">전체 기간 누적</option>
+      </select>
+    </div>
+
+    <!-- 1. 대시보드 카드 -->
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
         <div class="text-xs text-slate-400 flex items-center justify-between">
-          <span>당월 지출</span>
+          <span id="selectedPeriodLabel">선택기간 지출</span>
           <i class="fa-solid fa-won-sign text-emerald-400"></i>
         </div>
         <div class="mt-2">
-          <span id="monthlyTotal" class="text-xl font-bold tracking-tight text-white">0</span>
+          <span id="periodTotalCost" class="text-xl font-bold tracking-tight text-white">0</span>
           <span class="text-xs text-slate-400 ml-0.5">원</span>
         </div>
       </div>
@@ -72,17 +83,35 @@
 
       <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
         <div class="text-xs text-slate-400 flex items-center justify-between">
-          <span>누적 총 지출</span>
+          <span>전체 누적 지출</span>
           <i class="fa-solid fa-receipt text-purple-400"></i>
         </div>
         <div class="mt-2">
-          <span id="totalCost" class="text-xl font-bold tracking-tight text-white">0</span>
+          <span id="allTimeTotalCost" class="text-xl font-bold tracking-tight text-white">0</span>
           <span class="text-xs text-slate-400 ml-0.5">원</span>
         </div>
       </div>
     </div>
 
-    <!-- 카테고리 필터 -->
+    <!-- 2. 소모품 트래커 카드 -->
+    <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-sm space-y-3.5">
+      <div class="flex items-center justify-between pb-1 border-b border-slate-700/40">
+        <div class="flex items-center space-x-1.5">
+          <i class="fa-solid fa-screwdriver-wrench text-xs text-emerald-400"></i>
+          <h2 class="text-xs font-bold text-white tracking-wide">소모품 교체 주기 관리</h2>
+        </div>
+        <button type="button" onclick="openPartsModal()" class="text-[11px] text-slate-400 hover:text-emerald-400 transition flex items-center space-x-1">
+          <i class="fa-solid fa-gear"></i>
+          <span>기준 설정</span>
+        </button>
+      </div>
+
+      <div id="partsContainer" class="space-y-3">
+        <!-- 렌더링 영역 -->
+      </div>
+    </div>
+
+    <!-- 3. 카테고리 필터 탭 -->
     <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
       <button type="button" onclick="setFilter('전체')" class="filter-btn active px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500 text-white whitespace-nowrap transition">전체</button>
       <button type="button" onclick="setFilter('주유')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">⛽ 주유</button>
@@ -94,14 +123,13 @@
       <button type="button" onclick="setFilter('기타')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">📦 기타</button>
     </div>
 
-    <!-- 지출 내역 영역 -->
+    <!-- 4. 지출 내역 리스트 -->
     <div class="space-y-2.5">
       <div class="flex justify-between items-center px-1">
         <h2 class="text-xs font-bold text-slate-400 tracking-wider uppercase">지출 내역</h2>
         <span id="recordCount" class="text-xs text-slate-500">0건</span>
       </div>
 
-      <!-- 리스트 컨테이너 -->
       <div id="recordList" class="space-y-2.5 min-h-[140px] flex flex-col justify-center">
         <div id="loadingIndicator" class="text-center py-8 text-slate-500">
           <i class="fa-solid fa-circle-notch fa-spin text-2xl text-emerald-400"></i>
@@ -111,7 +139,7 @@
     </div>
   </main>
 
-  <!-- 하단 추가 버튼 (최상단 z-index 고정) -->
+  <!-- 하단 추가 플로팅 버튼 -->
   <div class="fixed bottom-6 left-0 right-0 max-w-md mx-auto px-4 z-40">
     <button type="button" id="openModalBtn" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition cursor-pointer">
       <i class="fa-solid fa-plus text-base pointer-events-none"></i>
@@ -119,7 +147,7 @@
     </button>
   </div>
 
-  <!-- 입력 모달 창 -->
+  <!-- 지출 등록 모달 -->
   <div id="inputModal" style="display: none;" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 max-h-[92vh] overflow-y-auto no-scrollbar shadow-2xl">
       <div class="flex justify-between items-center pb-3 border-b border-slate-800">
@@ -130,7 +158,6 @@
       </div>
 
       <form id="recordForm" class="mt-4 space-y-4">
-        <!-- 1. 카테고리 선택 -->
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-2">구분 선택</label>
           <div class="grid grid-cols-4 gap-2">
@@ -145,7 +172,6 @@
           <input type="hidden" id="formType" value="주유">
         </div>
 
-        <!-- 2. 날짜 및 내용 -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">날짜</label>
@@ -153,11 +179,10 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">내용 / 장소</label>
-            <input type="text" id="formTitle" placeholder="예: 주유소, 주차장" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formTitle" placeholder="예: 주유소, 주차요금" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
           </div>
         </div>
 
-        <!-- 3. 결제 금액 및 주행거리 -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">결제 금액 (원)</label>
@@ -169,7 +194,6 @@
           </div>
         </div>
 
-        <!-- 4. 주유 전용 영역 -->
         <div id="fuelSection" class="p-3 bg-slate-800/50 border border-slate-800 rounded-xl space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -183,17 +207,50 @@
           </div>
         </div>
 
-        <!-- 5. 메모 -->
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">메모 (선택)</label>
           <input type="text" id="formNote" placeholder="추가 메모" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
         </div>
 
-        <!-- 제출 버튼 -->
         <button type="submit" id="submitBtn" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
           <span>구글 시트에 저장하기</span>
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- 소모품 설정 모달 -->
+  <div id="partsModal" style="display: none;" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white">소모품 마지막 교체 거리(km) 설정</h3>
+        <button type="button" onclick="closePartsModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">엔진오일 (최근 교체 시점)</label>
+          <input type="number" id="cfgOilOdo" placeholder="예: 140000" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">에어컨 필터 (최근 교체 시점)</label>
+          <input type="number" id="cfgAirOdo" placeholder="예: 135000" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">브레이크 오일 (최근 교체 시점)</label>
+          <input type="number" id="cfgBrakeOdo" placeholder="예: 120000" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">미션 오일 (최근 교체 시점)</label>
+          <input type="number" id="cfgTransOdo" placeholder="예: 100000" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+
+      <button type="button" onclick="savePartsConfig()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition">
+        설정 저장하기
+      </button>
     </div>
   </div>
 
@@ -202,36 +259,34 @@
 
     let records = [];
     let currentFilter = '전체';
+    let selectedMonth = 'CURRENT'; // 'CURRENT', 'ALL', 또는 '2026-09' 형태
 
-    // DOM 요소 캐싱
+    const PARTS_CONFIG = [
+      { key: "oil", name: "엔진오일 & 필터", interval: 8000, keywords: ["엔진오일", "오일필터", "엔진"] },
+      { key: "air", name: "에어컨 / 히터 필터", interval: 10000, keywords: ["에어컨필터", "항균필터", "히터필터", "캐빈필터"] },
+      { key: "brake", name: "브레이크 오일", interval: 40000, keywords: ["브레이크오일", "브레이크액"] },
+      { key: "trans", name: "미션오일 (변속기)", interval: 80000, keywords: ["미션오일", "변속기"] }
+    ];
+
     const modal = document.getElementById("inputModal");
+    const partsModal = document.getElementById("partsModal");
     const openBtn = document.getElementById("openModalBtn");
     const closeBtn = document.getElementById("closeModalBtn");
     const formCost = document.getElementById("formCost");
     const formLiters = document.getElementById("formLiters");
     const formUnitPrice = document.getElementById("formUnitPrice");
 
-    // 모달 제어 이벤트 바인딩 (인라인 클릭 이슈 방지)
-    openBtn.addEventListener("click", () => {
-      modal.style.display = "flex";
-    });
+    openBtn.addEventListener("click", () => { modal.style.display = "flex"; });
+    closeBtn.addEventListener("click", () => { modal.style.display = "none"; });
 
-    closeBtn.addEventListener("click", () => {
-      modal.style.display = "none";
-    });
-
-    // 단가 자동계산
     function calcUnitPrice() {
       const cost = Number(formCost.value) || 0;
       const liters = Number(formLiters.value) || 0;
-      if (cost > 0 && liters > 0) {
-        formUnitPrice.value = Math.round(cost / liters);
-      }
+      if (cost > 0 && liters > 0) formUnitPrice.value = Math.round(cost / liters);
     }
     formCost.addEventListener("input", calcUnitPrice);
     formLiters.addEventListener("input", calcUnitPrice);
 
-    // 카테고리 칩 선택 이벤트 바인딩
     document.querySelectorAll(".cat-chip").forEach(btn => {
       btn.addEventListener("click", () => {
         const cat = btn.getAttribute("data-cat");
@@ -243,15 +298,11 @@
         btn.className = "cat-chip active py-2 px-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
 
         const fuelSection = document.getElementById("fuelSection");
-        if (cat === "주유") {
-          fuelSection.style.display = "block";
-        } else {
-          fuelSection.style.display = "none";
-        }
+        fuelSection.style.display = (cat === "주유") ? "block" : "none";
       });
     });
 
-    // 1. 구글 시트 데이터 로드 (최대 3초 타임아웃 방어)
+    // 1. 구글 시트 데이터 로드
     async function fetchData() {
       const refreshIcon = document.getElementById("refreshIcon");
       const listContainer = document.getElementById("recordList");
@@ -277,35 +328,98 @@
         records = Array.isArray(data) ? data : [];
         records.sort((a, b) => new Date(b.date) - new Date(a.date));
       } catch (err) {
-        console.warn("데이터 가져오기 지연 또는 빈 상태:", err);
+        console.warn("데이터 지연 또는 빈 상태:", err);
       } finally {
         refreshIcon.classList.remove("fa-spin");
+        buildMonthDropdown();
         updateDashboard();
+        renderPartsTracker();
         renderRecords();
       }
     }
 
-    // 2. 대시보드 계산
-    function updateDashboard() {
-      const now = new Date();
-      const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    // 2. 월별 드롭다운 옵션 자동 생성
+    function buildMonthDropdown() {
+      const selector = document.getElementById("monthSelector");
+      const currentSelected = selector.value || selectedMonth;
 
-      let monthlyTotal = 0;
-      let totalCost = 0;
+      const now = new Date();
+      const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+      // 기록에 존재하는 연-월 수집
+      const monthSet = new Set();
+      monthSet.add(thisMonth);
+      records.forEach(r => {
+        if (r.date && r.date.length >= 7) {
+          monthSet.add(r.date.substring(0, 7));
+        }
+      });
+
+      const sortedMonths = Array.from(monthSet).sort().reverse();
+
+      selector.innerHTML = "";
+      sortedMonths.forEach(m => {
+        const [year, mon] = m.split("-");
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.innerText = (m === thisMonth) ? `${year}년 ${Number(mon)}월 (당월)` : `${year}년 ${Number(mon)}월`;
+        selector.appendChild(opt);
+      });
+
+      const allOpt = document.createElement("option");
+      allOpt.value = "ALL";
+      allOpt.innerText = "전체 기간 누적";
+      selector.appendChild(allOpt);
+
+      if (sortedMonths.includes(currentSelected) || currentSelected === "ALL") {
+        selector.value = currentSelected;
+        selectedMonth = currentSelected;
+      } else {
+        selector.value = thisMonth;
+        selectedMonth = thisMonth;
+      }
+    }
+
+    function changeSelectedMonth(val) {
+      selectedMonth = val;
+      updateDashboard();
+      renderRecords();
+    }
+
+    // 3. 대시보드 통계 계산
+    function updateDashboard() {
+      let periodTotal = 0;
+      let allTimeTotal = 0;
       let maxOdo = 0;
 
       records.forEach(r => {
         const cost = Number(r.cost) || 0;
         const odo = Number(r.odo) || 0;
-        totalCost += cost;
-        if (String(r.date).startsWith(prefix)) monthlyTotal += cost;
+        allTimeTotal += cost;
+
+        if (selectedMonth === "ALL") {
+          periodTotal += cost;
+        } else if (r.date && r.date.startsWith(selectedMonth)) {
+          periodTotal += cost;
+        }
+
         if (odo > maxOdo) maxOdo = odo;
       });
 
-      document.getElementById("monthlyTotal").innerText = monthlyTotal.toLocaleString();
-      document.getElementById("totalCost").innerText = totalCost.toLocaleString();
+      // 라벨 갱신
+      const label = document.getElementById("selectedPeriodLabel");
+      if (selectedMonth === "ALL") {
+        label.innerText = "전체 합계 지출";
+      } else {
+        const parts = selectedMonth.split("-");
+        label.innerText = `${Number(parts[1])}월 총 지출`;
+      }
+
+      document.getElementById("periodTotalCost").innerText = periodTotal.toLocaleString();
+      document.getElementById("allTimeTotalCost").innerText = allTimeTotal.toLocaleString();
       document.getElementById("latestOdo").innerText = maxOdo > 0 ? maxOdo.toLocaleString() : "0";
 
+      // 연비 계산 (전체 주유 기준 정렬)
       const fuelRecords = records
         .filter(r => r.type === "주유" && Number(r.odo) > 0 && Number(r.liters) > 0)
         .sort((a, b) => Number(a.odo) - Number(b.odo));
@@ -322,14 +436,117 @@
       document.getElementById("avgFuelEfficiency").innerText = "--";
     }
 
-    // 3. 지출 내역 출력
+    // 4. 소모품 트래커 렌더링
+    function renderPartsTracker() {
+      const container = document.getElementById("partsContainer");
+      container.innerHTML = "";
+
+      let maxOdo = 0;
+      records.forEach(r => {
+        const o = Number(r.odo) || 0;
+        if (o > maxOdo) maxOdo = o;
+      });
+
+      const customConfig = JSON.parse(localStorage.getItem("car_parts_odo") || "{}");
+
+      PARTS_CONFIG.forEach(part => {
+        let lastReplacedOdo = 0;
+
+        const matchedRecord = records.find(r => {
+          if (r.type !== "정비" || !Number(r.odo)) return false;
+          const text = (r.title + " " + r.note).toLowerCase();
+          return part.keywords.some(kw => text.includes(kw));
+        });
+
+        if (matchedRecord) {
+          lastReplacedOdo = Number(matchedRecord.odo);
+        } else if (customConfig[part.key]) {
+          lastReplacedOdo = Number(customConfig[part.key]);
+        }
+
+        const driven = maxOdo > lastReplacedOdo ? maxOdo - lastReplacedOdo : 0;
+        const remain = part.interval - driven;
+        const pct = Math.min(100, Math.max(0, Math.round((driven / part.interval) * 100)));
+
+        let statusText = "안전";
+        let barColor = "bg-emerald-400";
+        let badgeColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
+
+        if (remain <= 0) {
+          statusText = "교체 시급!";
+          barColor = "bg-rose-500";
+          badgeColor = "text-rose-400 bg-rose-500/10 border-rose-500/30 animate-pulse";
+        } else if (remain <= 1000) {
+          statusText = "교체 권장";
+          barColor = "bg-amber-400";
+          badgeColor = "text-amber-400 bg-amber-500/10 border-amber-500/30";
+        }
+
+        const div = document.createElement("div");
+        div.className = "space-y-1.5";
+        div.innerHTML = `
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-slate-200">${part.name}</span>
+            <div class="flex items-center space-x-1.5">
+              <span class="text-[11px] font-bold ${remain <= 0 ? 'text-rose-400' : 'text-slate-300'}">
+                ${remain <= 0 ? `+${Math.abs(remain).toLocaleString()}km 초과` : `D-${remain.toLocaleString()} km`}
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded border font-medium ${badgeColor}">${statusText}</span>
+            </div>
+          </div>
+          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+            <div class="${barColor} h-1.5 rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-slate-500">
+            <span>마지막 교체: ${lastReplacedOdo > 0 ? `${lastReplacedOdo.toLocaleString()}km` : '기록 없음'}</span>
+            <span>주기: ${part.interval.toLocaleString()}km</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function openPartsModal() {
+      const saved = JSON.parse(localStorage.getItem("car_parts_odo") || "{}");
+      document.getElementById("cfgOilOdo").value = saved.oil || "";
+      document.getElementById("cfgAirOdo").value = saved.air || "";
+      document.getElementById("cfgBrakeOdo").value = saved.brake || "";
+      document.getElementById("cfgTransOdo").value = saved.trans || "";
+      partsModal.style.display = "flex";
+    }
+
+    function closePartsModal() {
+      partsModal.style.display = "none";
+    }
+
+    function savePartsConfig() {
+      const data = {
+        oil: Number(document.getElementById("cfgOilOdo").value) || 0,
+        air: Number(document.getElementById("cfgAirOdo").value) || 0,
+        brake: Number(document.getElementById("cfgBrakeOdo").value) || 0,
+        trans: Number(document.getElementById("cfgTransOdo").value) || 0
+      };
+      localStorage.setItem("car_parts_odo", JSON.stringify(data));
+      closePartsModal();
+      renderPartsTracker();
+    }
+
+    // 5. 지출 내역 렌더링 (월별 필터 + 카테고리 필터 동시 적용)
     function renderRecords() {
       const listContainer = document.getElementById("recordList");
       listContainer.innerHTML = "";
 
-      const filtered = currentFilter === '전체' 
-        ? records 
-        : records.filter(r => r.type === currentFilter);
+      let filtered = records;
+
+      // 기간 필터
+      if (selectedMonth !== "ALL") {
+        filtered = filtered.filter(r => r.date && r.date.startsWith(selectedMonth));
+      }
+
+      // 카테고리 필터
+      if (currentFilter !== '전체') {
+        filtered = filtered.filter(r => r.type === currentFilter);
+      }
 
       document.getElementById("recordCount").innerText = `${filtered.length}건`;
 
@@ -337,8 +554,8 @@
         listContainer.innerHTML = `
           <div class="text-center py-8 text-slate-500 bg-slate-800/40 rounded-xl border border-slate-800">
             <i class="fa-regular fa-folder-open text-2xl mb-1 text-slate-600 block"></i>
-            <p class="text-xs">내역이 없습니다.</p>
-            <p class="text-[11px] text-slate-600 mt-0.5">아래 버튼을 눌러 첫 기록을 입력해 보세요.</p>
+            <p class="text-xs">선택한 기간의 내역이 없습니다.</p>
+            <p class="text-[11px] text-slate-600 mt-0.5">상단 조회 기간을 변경하거나 새 기록을 등록해 보세요.</p>
           </div>
         `;
         return;
@@ -384,7 +601,6 @@
       });
     }
 
-    // 4. 필터 변경
     function setFilter(filter) {
       currentFilter = filter;
       document.querySelectorAll(".filter-btn").forEach(btn => {
@@ -397,7 +613,7 @@
       renderRecords();
     }
 
-    // 5. 폼 제출 (저장)
+    // 6. 데이터 전송
     document.getElementById("recordForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const submitBtn = document.getElementById("submitBtn");
@@ -424,7 +640,6 @@
           mode: "no-cors"
         });
 
-        // 입력 폼 리셋 및 모달 닫기
         document.getElementById("formTitle").value = "";
         document.getElementById("formCost").value = "";
         document.getElementById("formOdo").value = "";
@@ -433,9 +648,10 @@
         document.getElementById("formNote").value = "";
         modal.style.display = "none";
 
-        // 화면 즉시 임시 반영 후 시트 갱신
         records.unshift(newRecord);
+        buildMonthDropdown();
         updateDashboard();
+        renderPartsTracker();
         renderRecords();
 
         setTimeout(() => fetchData(), 1200);
@@ -448,7 +664,6 @@
       }
     });
 
-    // 시작 시 기본 날짜 세팅 및 데이터 조회
     document.getElementById("formDate").valueAsDate = new Date();
     fetchData();
   </script>
