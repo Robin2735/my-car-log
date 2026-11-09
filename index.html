@@ -12,9 +12,9 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-24">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-28">
 
-  <!-- 상단 네비게이션 -->
+  <!-- 상단 헤더 -->
   <header class="sticky top-0 z-20 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between">
     <div class="flex items-center space-x-2">
       <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
@@ -23,11 +23,11 @@
       <h1 class="text-base font-bold tracking-tight text-white">마이카 로그</h1>
     </div>
     <div class="flex items-center space-x-2">
-      <button onclick="fetchData()" id="refreshBtn" class="p-2 text-slate-400 hover:text-white transition">
+      <button type="button" onclick="fetchData()" id="refreshBtn" class="p-2 text-slate-400 hover:text-white transition">
         <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i>
       </button>
-      <span id="syncBadge" class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full border border-slate-700 flex items-center space-x-1">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+      <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full border border-slate-700 flex items-center space-x-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
         <span>시트 연동</span>
       </span>
     </div>
@@ -35,7 +35,7 @@
 
   <main class="max-w-md mx-auto px-4 pt-4 space-y-4">
 
-    <!-- 대시보드 카드 -->
+    <!-- 대시보드 요약 카드 -->
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
         <div class="text-xs text-slate-400 flex items-center justify-between">
@@ -82,64 +82,65 @@
       </div>
     </div>
 
-    <!-- 카테고리 필터 탭 -->
+    <!-- 카테고리 필터 -->
     <div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
-      <button onclick="setFilter('전체')" class="filter-btn active px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500 text-white whitespace-nowrap transition">전체</button>
-      <button onclick="setFilter('주유')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">⛽ 주유</button>
-      <button onclick="setFilter('정비')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">🔧 정비</button>
-      <button onclick="setFilter('세차')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">🚗 세차</button>
-      <button onclick="setFilter('주차')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">🅿️ 주차</button>
-      <button onclick="setFilter('통행료')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">🛣️ 통행료</button>
-      <button onclick="setFilter('보험/세금')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">📄 보험/세금</button>
-      <button onclick="setFilter('기타')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">📦 기타</button>
+      <button type="button" onclick="setFilter('전체')" class="filter-btn active px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500 text-white whitespace-nowrap transition">전체</button>
+      <button type="button" onclick="setFilter('주유')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">⛽ 주유</button>
+      <button type="button" onclick="setFilter('정비')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">🔧 정비</button>
+      <button type="button" onclick="setFilter('세차')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">🚗 세차</button>
+      <button type="button" onclick="setFilter('주차')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">🅿️ 주차</button>
+      <button type="button" onclick="setFilter('통행료')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">🛣️ 통행료</button>
+      <button type="button" onclick="setFilter('보험/세금')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">📄 보험/세금</button>
+      <button type="button" onclick="setFilter('기타')" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition">📦 기타</button>
     </div>
 
-    <!-- 지출 내역 리스트 -->
+    <!-- 지출 내역 영역 -->
     <div class="space-y-2.5">
       <div class="flex justify-between items-center px-1">
         <h2 class="text-xs font-bold text-slate-400 tracking-wider uppercase">지출 내역</h2>
         <span id="recordCount" class="text-xs text-slate-500">0건</span>
       </div>
 
-      <div id="loadingIndicator" class="text-center py-10 text-slate-500">
-        <i class="fa-solid fa-circle-notch fa-spin text-2xl text-emerald-400"></i>
-        <p class="text-xs mt-2">구글 시트에서 데이터를 불러오는 중...</p>
+      <!-- 리스트 컨테이너 -->
+      <div id="recordList" class="space-y-2.5 min-h-[140px] flex flex-col justify-center">
+        <div id="loadingIndicator" class="text-center py-8 text-slate-500">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-emerald-400"></i>
+          <p class="text-xs mt-2">구글 시트 데이터 확인 중...</p>
+        </div>
       </div>
-
-      <div id="recordList" class="space-y-2.5 hidden"></div>
     </div>
   </main>
 
-  <!-- 하단 플로팅 추가 버튼 -->
-  <div class="fixed bottom-6 left-0 right-0 max-w-md mx-auto px-4 z-30">
-    <button onclick="openModal()" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition">
-      <i class="fa-solid fa-plus"></i>
-      <span>새로운 기록 추가</span>
+  <!-- 하단 추가 버튼 (최상단 z-index 고정) -->
+  <div class="fixed bottom-6 left-0 right-0 max-w-md mx-auto px-4 z-40">
+    <button type="button" id="openModalBtn" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition cursor-pointer">
+      <i class="fa-solid fa-plus text-base pointer-events-none"></i>
+      <span class="pointer-events-none text-sm">새로운 기록 추가</span>
     </button>
   </div>
 
-  <!-- 입력 모달창 -->
-  <div id="inputModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+  <!-- 입력 모달 창 -->
+  <div id="inputModal" style="display: none;" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl p-5 max-h-[92vh] overflow-y-auto no-scrollbar shadow-2xl">
       <div class="flex justify-between items-center pb-3 border-b border-slate-800">
         <h3 class="text-base font-bold text-white">차량 지출 등록</h3>
-        <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark text-lg"></i>
+        <button type="button" id="closeModalBtn" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-xl"></i>
         </button>
       </div>
 
-      <form id="recordForm" onsubmit="handleSubmit(event)" class="mt-4 space-y-4">
-        <!-- 1. 카테고리 선택 칩 -->
+      <form id="recordForm" class="mt-4 space-y-4">
+        <!-- 1. 카테고리 선택 -->
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-2">구분 선택</label>
           <div class="grid grid-cols-4 gap-2">
-            <button type="button" onclick="selectCategory('주유')" class="cat-chip active py-2 px-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">⛽ 주유</button>
-            <button type="button" onclick="selectCategory('정비')" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">🔧 정비</button>
-            <button type="button" onclick="selectCategory('세차')" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">🚗 세차</button>
-            <button type="button" onclick="selectCategory('주차')" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">🅿️ 주차</button>
-            <button type="button" onclick="selectCategory('통행료')" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">🛣️ 통행료</button>
-            <button type="button" onclick="selectCategory('보험/세금')" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">📄 보험/세금</button>
-            <button type="button" onclick="selectCategory('기타')" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700 col-span-2">📦 기타</button>
+            <button type="button" data-cat="주유" class="cat-chip active py-2 px-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">⛽ 주유</button>
+            <button type="button" data-cat="정비" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">🔧 정비</button>
+            <button type="button" data-cat="세차" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">🚗 세차</button>
+            <button type="button" data-cat="주차" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">🅿️ 주차</button>
+            <button type="button" data-cat="통행료" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">🛣️ 통행료</button>
+            <button type="button" data-cat="보험/세금" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">📄 보험/세금</button>
+            <button type="button" data-cat="기타" class="cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700 col-span-2">📦 기타</button>
           </div>
           <input type="hidden" id="formType" value="주유">
         </div>
@@ -152,15 +153,15 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">내용 / 장소</label>
-            <input type="text" id="formTitle" placeholder="예: 알뜰주유소, 주차요금" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formTitle" placeholder="예: 주유소, 주차장" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
           </div>
         </div>
 
-        <!-- 3. 결제 금액 및 현재 주행거리 -->
+        <!-- 3. 결제 금액 및 주행거리 -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">결제 금액 (원)</label>
-            <input type="number" id="formCost" placeholder="0" required oninput="calculateUnitPrice()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            <input type="number" id="formCost" placeholder="0" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">계기판 주행거리 (km)</label>
@@ -173,10 +174,10 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-400 mb-1">주유량 (L)</label>
-              <input type="number" step="0.01" id="formLiters" placeholder="예: 32.5" oninput="calculateUnitPrice()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+              <input type="number" step="0.01" id="formLiters" placeholder="예: 35.2" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 mb-1">리터당 단가 (원/L)</label>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">단가 (원/L)</label>
               <input type="number" id="formUnitPrice" placeholder="자동계산" class="w-full bg-slate-800/60 border border-slate-700/60 rounded-xl px-3 py-2.5 text-xs text-emerald-400 font-semibold placeholder-slate-500 focus:outline-none">
             </div>
           </div>
@@ -185,11 +186,11 @@
         <!-- 5. 메모 -->
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">메모 (선택)</label>
-          <input type="text" id="formNote" placeholder="추가 사항 입력" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          <input type="text" id="formNote" placeholder="추가 메모" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
         </div>
 
         <!-- 제출 버튼 -->
-        <button type="submit" id="submitBtn" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
+        <button type="submit" id="submitBtn" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
           <span>구글 시트에 저장하기</span>
         </button>
       </form>
@@ -202,54 +203,142 @@
     let records = [];
     let currentFilter = '전체';
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("formDate").valueAsDate = new Date();
-      fetchData();
+    // DOM 요소 캐싱
+    const modal = document.getElementById("inputModal");
+    const openBtn = document.getElementById("openModalBtn");
+    const closeBtn = document.getElementById("closeModalBtn");
+    const formCost = document.getElementById("formCost");
+    const formLiters = document.getElementById("formLiters");
+    const formUnitPrice = document.getElementById("formUnitPrice");
+
+    // 모달 제어 이벤트 바인딩 (인라인 클릭 이슈 방지)
+    openBtn.addEventListener("click", () => {
+      modal.style.display = "flex";
     });
 
-    // 1. 구글 시트 데이터 로드 (GET & 리다이렉트 대응)
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    // 단가 자동계산
+    function calcUnitPrice() {
+      const cost = Number(formCost.value) || 0;
+      const liters = Number(formLiters.value) || 0;
+      if (cost > 0 && liters > 0) {
+        formUnitPrice.value = Math.round(cost / liters);
+      }
+    }
+    formCost.addEventListener("input", calcUnitPrice);
+    formLiters.addEventListener("input", calcUnitPrice);
+
+    // 카테고리 칩 선택 이벤트 바인딩
+    document.querySelectorAll(".cat-chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const cat = btn.getAttribute("data-cat");
+        document.getElementById("formType").value = cat;
+
+        document.querySelectorAll(".cat-chip").forEach(b => {
+          b.className = "cat-chip py-2 px-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700";
+        });
+        btn.className = "cat-chip active py-2 px-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+
+        const fuelSection = document.getElementById("fuelSection");
+        if (cat === "주유") {
+          fuelSection.style.display = "block";
+        } else {
+          fuelSection.style.display = "none";
+        }
+      });
+    });
+
+    // 1. 구글 시트 데이터 로드 (최대 3초 타임아웃 방어)
     async function fetchData() {
       const refreshIcon = document.getElementById("refreshIcon");
-      const loading = document.getElementById("loadingIndicator");
-      const list = document.getElementById("recordList");
-
+      const listContainer = document.getElementById("recordList");
       refreshIcon.classList.add("fa-spin");
-      loading.classList.remove("hidden");
-      list.classList.add("hidden");
+
+      listContainer.innerHTML = `
+        <div id="loadingIndicator" class="text-center py-8 text-slate-500">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-emerald-400"></i>
+          <p class="text-xs mt-2">구글 시트 데이터 확인 중...</p>
+        </div>
+      `;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
 
       try {
         const res = await fetch(API_URL, {
           method: "GET",
-          redirect: "follow"
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         const data = await res.json();
         records = Array.isArray(data) ? data : [];
         records.sort((a, b) => new Date(b.date) - new Date(a.date));
       } catch (err) {
-        console.warn("데이터 로드 주의 (빈 시트이거나 네트워크 대기):", err);
-        records = [];
+        console.warn("데이터 가져오기 지연 또는 빈 상태:", err);
       } finally {
         refreshIcon.classList.remove("fa-spin");
-        loading.classList.add("hidden");
-        list.classList.remove("hidden");
         updateDashboard();
         renderRecords();
       }
     }
 
-    // 2. 대시보드 통계 계산
+    // 2. 대시보드 계산
     function updateDashboard() {
       const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-      const yearMonthPrefix = `${currentYear}-${currentMonth}`;  let monthlyTotal = 0; let totalCost = 0; let maxOdo = 0;  records.forEach(r => { const cost = Number(r.cost) \vert{}\vert{} 0; const odo = Number(r.odo) \vert{}\vert{} 0; totalCost += cost;  if (String(r.date).startsWith(yearMonthPrefix)) { monthlyTotal += cost; } if (odo > maxOdo) { maxOdo = odo; } });  document.getElementById("monthlyTotal").innerText = monthlyTotal.toLocaleString(); document.getElementById("totalCost").innerText = totalCost.toLocaleString(); document.getElementById("latestOdo").innerText = maxOdo > 0 ? maxOdo.toLocaleString() : "0";  calculateFuelEfficiency(); }  function calculateFuelEfficiency() { const fuelRecords = records .filter(r => r.type === "주유" && Number(r.odo) > 0 && Number(r.liters) > 0) .sort((a, b) => Number(a.odo) - Number(b.odo));  if (fuelRecords.length >= 2) { const last = fuelRecords[fuelRecords.length - 1]; const prev = fuelRecords[fuelRecords.length - 2]; const distance = last.odo - prev.odo; if (distance > 0 && last.liters > 0) { const eff = (distance / last.liters).toFixed(1); document.getElementById("avgFuelEfficiency").innerText = eff; return; } } document.getElementById("avgFuelEfficiency").innerText = "--"; }  // 3. 내역 렌더링 function renderRecords() { const container = document.getElementById("recordList"); container.innerHTML = "";  const filtered = currentFilter === '전체' ? records : records.filter(r => r.type === currentFilter);  document.getElementById("recordCount").innerText = `${filtered.length}건`;
+      const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+      let monthlyTotal = 0;
+      let totalCost = 0;
+      let maxOdo = 0;
+
+      records.forEach(r => {
+        const cost = Number(r.cost) || 0;
+        const odo = Number(r.odo) || 0;
+        totalCost += cost;
+        if (String(r.date).startsWith(prefix)) monthlyTotal += cost;
+        if (odo > maxOdo) maxOdo = odo;
+      });
+
+      document.getElementById("monthlyTotal").innerText = monthlyTotal.toLocaleString();
+      document.getElementById("totalCost").innerText = totalCost.toLocaleString();
+      document.getElementById("latestOdo").innerText = maxOdo > 0 ? maxOdo.toLocaleString() : "0";
+
+      const fuelRecords = records
+        .filter(r => r.type === "주유" && Number(r.odo) > 0 && Number(r.liters) > 0)
+        .sort((a, b) => Number(a.odo) - Number(b.odo));
+
+      if (fuelRecords.length >= 2) {
+        const last = fuelRecords[fuelRecords.length - 1];
+        const prev = fuelRecords[fuelRecords.length - 2];
+        const dist = last.odo - prev.odo;
+        if (dist > 0 && last.liters > 0) {
+          document.getElementById("avgFuelEfficiency").innerText = (dist / last.liters).toFixed(1);
+          return;
+        }
+      }
+      document.getElementById("avgFuelEfficiency").innerText = "--";
+    }
+
+    // 3. 지출 내역 출력
+    function renderRecords() {
+      const listContainer = document.getElementById("recordList");
+      listContainer.innerHTML = "";
+
+      const filtered = currentFilter === '전체' 
+        ? records 
+        : records.filter(r => r.type === currentFilter);
+
+      document.getElementById("recordCount").innerText = `${filtered.length}건`;
 
       if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-10 text-slate-500 bg-slate-800/40 rounded-xl border border-slate-800">
-            <i class="fa-regular fa-folder-open text-2xl mb-2 text-slate-600 block"></i>
-            <p class="text-xs">등록된 지출 내역이 없습니다.</p>
-            <p class="text-[11px] text-slate-600 mt-1">하단의 [새로운 기록 추가]를 눌러 첫 기록을 남겨보세요.</p>
+        listContainer.innerHTML = `
+          <div class="text-center py-8 text-slate-500 bg-slate-800/40 rounded-xl border border-slate-800">
+            <i class="fa-regular fa-folder-open text-2xl mb-1 text-slate-600 block"></i>
+            <p class="text-xs">내역이 없습니다.</p>
+            <p class="text-[11px] text-slate-600 mt-0.5">아래 버튼을 눌러 첫 기록을 입력해 보세요.</p>
           </div>
         `;
         return;
@@ -267,10 +356,11 @@
         else if (r.type === "통행료") iconClass = "fa-road text-indigo-400";
         else if (r.type === "보험/세금") iconClass = "fa-file-invoice-dollar text-red-400";
 
-        let subDetails = [];
-        if (r.odo) subDetails.push(`${Number(r.odo).toLocaleString()}km`);
-        if (r.type === "주유" && r.liters) subDetails.push(`${r.liters}L`); if (r.type === "주유" && r.unitPrice) subDetails.push(`@${Number(r.unitPrice).toLocaleString()}원`);
-        if (r.note) subDetails.push(r.note);
+        let sub = [];
+        if (r.odo) sub.push(`${Number(r.odo).toLocaleString()}km`);
+        if (r.type === "주유" && r.liters) sub.push(`${r.liters}L`);
+        if (r.type === "주유" && r.unitPrice) sub.push(`@${Number(r.unitPrice).toLocaleString()}원`);
+        if (r.note) sub.push(r.note);
 
         item.innerHTML = `
           <div class="flex items-center space-x-3">
@@ -282,8 +372,85 @@
                 <span class="text-xs font-bold text-white">${r.title || r.type}</span>
                 <span class="text-[10px] bg-slate-700/60 text-slate-300 px-1.5 py-0.2 rounded font-medium">${r.type}</span>
               </div>
-              <p class="text-[11px] text-slate-400 mt-0.5">${subDetails.join(" · ") || r.date}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">${sub.join(" · ") || r.date}</p>
             </div>
           </div>
           <div class="text-right">
-            <span class="text-sm font-bold text-white">${Number(r.cost).toLocaleString()}</span><span class
+            <span class="text-sm font-bold text-white">${Number(r.cost).toLocaleString()}</span><span class="text-[11px] text-slate-400 ml-0.5">원</span>
+            <p class="text-[10px] text-slate-500">${r.date}</p>
+          </div>
+        `;
+        listContainer.appendChild(item);
+      });
+    }
+
+    // 4. 필터 변경
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-btn").forEach(btn => {
+        if (btn.innerText.includes(filter)) {
+          btn.className = "filter-btn active px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500 text-white whitespace-nowrap transition";
+        } else {
+          btn.className = "filter-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap transition";
+        }
+      });
+      renderRecords();
+    }
+
+    // 5. 폼 제출 (저장)
+    document.getElementById("recordForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>저장 중...</span>`;
+
+      const newRecord = {
+        id: Date.now().toString(),
+        date: document.getElementById("formDate").value,
+        type: document.getElementById("formType").value,
+        title: document.getElementById("formTitle").value,
+        cost: Number(document.getElementById("formCost").value) || 0,
+        odo: Number(document.getElementById("formOdo").value) || 0,
+        liters: Number(document.getElementById("formLiters").value) || 0,
+        unitPrice: Number(document.getElementById("formUnitPrice").value) || 0,
+        note: document.getElementById("formNote").value
+      };
+
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(newRecord),
+          mode: "no-cors"
+        });
+
+        // 입력 폼 리셋 및 모달 닫기
+        document.getElementById("formTitle").value = "";
+        document.getElementById("formCost").value = "";
+        document.getElementById("formOdo").value = "";
+        document.getElementById("formLiters").value = "";
+        document.getElementById("formUnitPrice").value = "";
+        document.getElementById("formNote").value = "";
+        modal.style.display = "none";
+
+        // 화면 즉시 임시 반영 후 시트 갱신
+        records.unshift(newRecord);
+        updateDashboard();
+        renderRecords();
+
+        setTimeout(() => fetchData(), 1200);
+      } catch (err) {
+        alert("저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+        console.error(err);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>구글 시트에 저장하기</span>`;
+      }
+    });
+
+    // 시작 시 기본 날짜 세팅 및 데이터 조회
+    document.getElementById("formDate").valueAsDate = new Date();
+    fetchData();
+  </script>
+</body>
+</html>
