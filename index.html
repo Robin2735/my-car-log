@@ -14,7 +14,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-28">
 
-  <!-- 상단 헤더 -->
+  <!-- 상단 네비게이션 -->
   <header class="sticky top-0 z-20 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between">
     <div class="flex items-center space-x-2">
       <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
@@ -46,7 +46,7 @@
       </select>
     </div>
 
-    <!-- 1. 대시보드 카드 -->
+    <!-- 1. 핵심 대시보드 카드 -->
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
         <div class="text-xs text-slate-400 flex items-center justify-between">
@@ -106,9 +106,7 @@
         </button>
       </div>
 
-      <div id="partsContainer" class="space-y-3">
-        <!-- 렌더링 영역 -->
-      </div>
+      <div id="partsContainer" class="space-y-3"></div>
     </div>
 
     <!-- 3. 카테고리 필터 탭 -->
@@ -179,7 +177,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">내용 / 장소</label>
-            <input type="text" id="formTitle" placeholder="예: 주유소, 주차요금" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            <input type="text" id="formTitle" placeholder="예: 주유소, 정비소" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
           </div>
         </div>
 
@@ -259,7 +257,7 @@
 
     let records = [];
     let currentFilter = '전체';
-    let selectedMonth = 'CURRENT'; // 'CURRENT', 'ALL', 또는 '2026-09' 형태
+    let selectedMonth = 'CURRENT';
 
     const PARTS_CONFIG = [
       { key: "oil", name: "엔진오일 & 필터", interval: 8000, keywords: ["엔진오일", "오일필터", "엔진"] },
@@ -267,6 +265,32 @@
       { key: "brake", name: "브레이크 오일", interval: 40000, keywords: ["브레이크오일", "브레이크액"] },
       { key: "trans", name: "미션오일 (변속기)", interval: 80000, keywords: ["미션오일", "변속기"] }
     ];
+
+    // 날짜를 YYYY-MM-DD 객체로 안전하게 파싱하는 헬퍼 함수
+    function normalizeDateInfo(rawDate) {
+      if (!rawDate) return { yyyymmdd: "날짜없음", monthKey: "" };
+
+      // 이미 '2026-11-08' 형태인 경우
+      if (typeof rawDate === "string" && /^\d{4}-\d{2}-\d{2}/.test(rawDate)) {
+        const yyyymmdd = rawDate.substring(0, 10).replace(/-/g, ".");
+        const monthKey = rawDate.substring(0, 7);
+        return { yyyymmdd, monthKey };
+      }
+
+      // Date 파싱 시도 (Sun Nov 08 2026... 대응)
+      const d = new Date(rawDate);
+      if (!isNaN(d.getTime())) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return {
+          yyyymmdd: `${y}.${m}.${day}`,
+          monthKey: `${y}-${m}`
+        };
+      }
+
+      return { yyyymmdd: String(rawDate).substring(0, 10), monthKey: "" };
+    }
 
     const modal = document.getElementById("inputModal");
     const partsModal = document.getElementById("partsModal");
@@ -326,6 +350,15 @@
         clearTimeout(timeoutId);
         const data = await res.json();
         records = Array.isArray(data) ? data : [];
+        
+        // 날짜 데이터 표준화 전처리
+        records.forEach(r => {
+          const info = normalizeDateInfo(r.date);
+          r._displayDate = info.yyyymmdd;
+          r._monthKey = info.monthKey;
+        });
+
+        // 최신순 정렬
         records.sort((a, b) => new Date(b.date) - new Date(a.date));
       } catch (err) {
         console.warn("데이터 지연 또는 빈 상태:", err);
@@ -338,7 +371,7 @@
       }
     }
 
-    // 2. 월별 드롭다운 옵션 자동 생성
+    // 2. 월별 드롭다운 옵션 자동 생성 (NaN 방지)
     function buildMonthDropdown() {
       const selector = document.getElementById("monthSelector");
       const currentSelected = selector.value || selectedMonth;
@@ -346,12 +379,12 @@
       const now = new Date();
       const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-      // 기록에 존재하는 연-월 수집
       const monthSet = new Set();
       monthSet.add(thisMonth);
+
       records.forEach(r => {
-        if (r.date && r.date.length >= 7) {
-          monthSet.add(r.date.substring(0, 7));
+        if (r._monthKey && r._monthKey.length === 7) {
+          monthSet.add(r._monthKey);
         }
       });
 
@@ -359,11 +392,13 @@
 
       selector.innerHTML = "";
       sortedMonths.forEach(m => {
-        const [year, mon] = m.split("-");
-        const opt = document.createElement("option");
-        opt.value = m;
-        opt.innerText = (m === thisMonth) ? `${year}년 ${Number(mon)}월 (당월)` : `${year}년 ${Number(mon)}월`;
-        selector.appendChild(opt);
+        const parts = m.split("-");
+        if (parts.length === 2) {
+          const opt = document.createElement("option");
+          opt.value = m;
+          opt.innerText = (m === thisMonth) ? `${parts[0]}년 ${Number(parts[1])}월 (당월)` : `${parts[0]}년 ${Number(parts[1])}월`;
+          selector.appendChild(opt);
+        }
       });
 
       const allOpt = document.createElement("option");
@@ -399,14 +434,13 @@
 
         if (selectedMonth === "ALL") {
           periodTotal += cost;
-        } else if (r.date && r.date.startsWith(selectedMonth)) {
+        } else if (r._monthKey === selectedMonth) {
           periodTotal += cost;
         }
 
         if (odo > maxOdo) maxOdo = odo;
       });
 
-      // 라벨 갱신
       const label = document.getElementById("selectedPeriodLabel");
       if (selectedMonth === "ALL") {
         label.innerText = "전체 합계 지출";
@@ -419,7 +453,6 @@
       document.getElementById("allTimeTotalCost").innerText = allTimeTotal.toLocaleString();
       document.getElementById("latestOdo").innerText = maxOdo > 0 ? maxOdo.toLocaleString() : "0";
 
-      // 연비 계산 (전체 주유 기준 정렬)
       const fuelRecords = records
         .filter(r => r.type === "주유" && Number(r.odo) > 0 && Number(r.liters) > 0)
         .sort((a, b) => Number(a.odo) - Number(b.odo));
@@ -436,7 +469,7 @@
       document.getElementById("avgFuelEfficiency").innerText = "--";
     }
 
-    // 4. 소모품 트래커 렌더링
+    // 4. 소모품 트래커
     function renderPartsTracker() {
       const container = document.getElementById("partsContainer");
       container.innerHTML = "";
@@ -531,19 +564,17 @@
       renderPartsTracker();
     }
 
-    // 5. 지출 내역 렌더링 (월별 필터 + 카테고리 필터 동시 적용)
+    // 5. 지출 목록 렌더링 (YYYY.MM.DD 표기 적용)
     function renderRecords() {
       const listContainer = document.getElementById("recordList");
       listContainer.innerHTML = "";
 
       let filtered = records;
 
-      // 기간 필터
       if (selectedMonth !== "ALL") {
-        filtered = filtered.filter(r => r.date && r.date.startsWith(selectedMonth));
+        filtered = filtered.filter(r => r._monthKey === selectedMonth);
       }
 
-      // 카테고리 필터
       if (currentFilter !== '전체') {
         filtered = filtered.filter(r => r.type === currentFilter);
       }
@@ -589,12 +620,12 @@
                 <span class="text-xs font-bold text-white">${r.title || r.type}</span>
                 <span class="text-[10px] bg-slate-700/60 text-slate-300 px-1.5 py-0.2 rounded font-medium">${r.type}</span>
               </div>
-              <p class="text-[11px] text-slate-400 mt-0.5">${sub.join(" · ") || r.date}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">${sub.join(" · ") || r._displayDate}</p>
             </div>
           </div>
           <div class="text-right">
             <span class="text-sm font-bold text-white">${Number(r.cost).toLocaleString()}</span><span class="text-[11px] text-slate-400 ml-0.5">원</span>
-            <p class="text-[10px] text-slate-500">${r.date}</p>
+            <p class="text-[11px] font-medium text-slate-400 mt-0.5 tracking-tight">${r._displayDate}</p>
           </div>
         `;
         listContainer.appendChild(item);
@@ -620,9 +651,10 @@
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>저장 중...</span>`;
 
+      const inputDate = document.getElementById("formDate").value;
       const newRecord = {
         id: Date.now().toString(),
-        date: document.getElementById("formDate").value,
+        date: inputDate,
         type: document.getElementById("formType").value,
         title: document.getElementById("formTitle").value,
         cost: Number(document.getElementById("formCost").value) || 0,
@@ -647,6 +679,10 @@
         document.getElementById("formUnitPrice").value = "";
         document.getElementById("formNote").value = "";
         modal.style.display = "none";
+
+        const info = normalizeDateInfo(newRecord.date);
+        newRecord._displayDate = info.yyyymmdd;
+        newRecord._monthKey = info.monthKey;
 
         records.unshift(newRecord);
         buildMonthDropdown();
